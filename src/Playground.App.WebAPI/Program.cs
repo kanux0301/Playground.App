@@ -1,3 +1,7 @@
+﻿using Playground.App.Application.Weather.Query;
+using Playground.App.Infrastructure;
+using Playground.App.Infrastructure.Interface;
+using Playground.App.Infrastructure.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -22,7 +26,12 @@ builder.Services.AddSwaggerGen(options =>
     var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
     options.IncludeXmlComments(xmlPath);
 });
-var app = builder.Build();
+builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(GetHourWeatherQueryHandler).Assembly));
+builder.Services.Configure<OpenMeteoSettings>(builder.Configuration.GetSection("OpenMeteo"));
+
+builder.Services.AddHttpClient<IWeatherService, OpenMeteoWeatherService>();
+
+var app = builder.Build();  
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
